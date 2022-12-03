@@ -78,6 +78,50 @@ public class GeneticAlgorithm {
 		Population population = new Population(this.populationSize, chromosomeLength);
 		return population;
 	}
+	
+	/**
+	 * Get Poisson Distribution for the chances of VM to fail
+	 * 
+	 * @param lambda
+	 *            The fault rate at which a VM is going to fail
+	 * @param x
+	 *            x is going to 0, the number of VM we want to fail          
+	 * @return the chances of 0 VM to fail
+	 */
+	static int factorial(int n)
+    {    
+        if (n == 0)    
+            return 1;    
+        else    
+            return(n * factorial(n-1));    
+    }    
+	
+	public static int getRandomPoisson(double lambda) 
+    {
+        double L = Math.exp(-lambda);
+        double p = 1.0;
+        int k = 0;
+
+        do 
+        {
+            k++;
+            p *= Math.random();
+        } while (p > L);
+
+        return k - 1;
+    }
+    
+	public static double getPoisson(double lambda, int x, int n) 
+    {
+        double L = Math.exp(-lambda) * n;
+        double p = Math.pow(lambda * n, x);
+        int k = factorial(x);
+        double result;
+        
+        result = L * p / k;
+
+        return result;
+    }
 
 	/**
 	 * Calculate fitness for an individual.
@@ -95,19 +139,34 @@ public class GeneticAlgorithm {
 	 */
 	public double calcFitness(Individual individual) {
 
-		// Track number of correct genes
-		int correctGenes = 0;
-
-		// Loop over individual's genes
-		for (int geneIndex = 0; geneIndex < individual.getChromosomeLength(); geneIndex++) {
-			// Add one fitness point for each "1" found
-			if (individual.getGene(geneIndex) == 1) {
-				correctGenes += 1;
-			}
+		double totalExecutionTime = 0;
+		double mips = 0;
+		double failureRate = 0.04847468455;
+		
+		for (int i=0; i<9; i++)
+		{
+			int gene = individual.getGene(i);
+			if (gene == 0 || gene == 1 || gene == 2) 
+			{
+				mips = 400;
+			}else if (gene == 4 || gene == 5 || gene == 6) 
+			{
+				mips = 500;
+			}else if (gene == 8 || gene == 9 || gene == 10)
+			{
+				mips = 600;
+			}else break;
+			
+			//Log.printLine("Gene " + gene);
+			totalExecutionTime = totalExecutionTime + cloudletList.get(i).getCloudletLength() / mips;
 		}
+		
+		int random = getRandomPoisson(failureRate);
+        double x=(getPoisson(failureRate, random, 9));
 
 		// Calculate fitness
-		double fitness = (double) correctGenes / individual.getChromosomeLength();
+		double fitness = 0.9 * totalExecutionTime + 0.1 * (1/x);
+		//Log.printLine("Fitness " + fitness);
 
 		// Store fitness
 		individual.setFitness(fitness);

@@ -166,13 +166,13 @@ public class CloudSimulationExample {
 
 			//Fourth step: Create VMs and Cloudlets and send them to broker
 			vmlist = createVM(brokerId,54); //creating vms
-			cloudletList = createCloudlet(brokerId,1000); // creating cloudlets
+			cloudletList = createCloudlet(brokerId,54); // creating cloudlets
 
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);
 			
 			//Sixth step GeneticAlgorithm
-			GeneticAlgorithm ga = new GeneticAlgorithm(15, 0.30, 0.95, 2, cloudletList, vmlist);
+			GeneticAlgorithm ga = new GeneticAlgorithm(20, 0.30, 0.95, 2, cloudletList, vmlist);
 
 			// Initialize population
 			System.out.println("Population Initialization");
@@ -193,12 +193,6 @@ public class CloudSimulationExample {
 					System.out.print(fit.chromosome[j] + " ");
 				}
 				System.out.println("  fitness => " + fit.getFitness());
-				
-				for(int j=0;j<9;j++)
-				{
-					broker.bindCloudletToVm(j, fit.chromosome[j]);
-				}
-				//List<Cloudlet> newList = broker.getCloudletReceivedList();
 
 				// Apply crossover
 				population = ga.crossoverPopulation(population);
@@ -213,7 +207,14 @@ public class CloudSimulationExample {
 				iteration++;
 				
 			}
-			System.out.println("Best solution of GA: " + population.getFittest(0).toString());
+			System.out.println("Best solution of GA: " + population.getFittest(0));
+			System.out.println("Highest Fitness Achieved: " + population.getFittest(0).getFitness());
+			//System.out.println(population.getFittest(0).getGene(0));
+			
+			for (int iterator=0; iterator<9; iterator++)
+			{
+				broker.bindCloudletToVm(iterator, population.getFittest(0).getGene(iterator));
+			}
 			
 			// Fifth step: Starts the simulation
 			CloudSim.startSimulation();
