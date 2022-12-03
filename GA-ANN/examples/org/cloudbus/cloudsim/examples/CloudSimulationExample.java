@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.DoubleSummaryStatistics;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.DoubleStream;
 
 //import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -170,50 +171,6 @@ public class CloudSimulationExample {
 
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);
-			
-			//Sixth step GeneticAlgorithm
-			GeneticAlgorithm ga = new GeneticAlgorithm(15, 0.30, 0.95, 2, cloudletList, vmlist);
-
-			// Initialize population
-			System.out.println("Population Initialization");
-			int chromosomeLength = 9;
-			Population population = ga.initPopulation(chromosomeLength);
-
-			// Evaluate population
-			ga.evalPopulation(population);
-			
-			int iteration = 1;
-			while (iteration <= 15) 
-			{	
-				// get fittest individual from population in every iteration
-				Individual fit = population.getFittest(0);
-				
-				System.out.print("Fittest: ");
-				for(int j=0;j<9;j++) {
-					System.out.print(fit.chromosome[j] + " ");
-				}
-				System.out.println("  fitness => " + fit.getFitness());
-				
-				for(int j=0;j<9;j++)
-				{
-					broker.bindCloudletToVm(j, fit.chromosome[j]);
-				}
-				//List<Cloudlet> newList = broker.getCloudletReceivedList();
-
-				// Apply crossover
-				population = ga.crossoverPopulation(population);
-
-				// Apply mutation
-				population = ga.mutatePopulation(population);
-
-				// Evaluate population
-				ga.evalPopulation(population);
-
-				// Increment the current generation
-				iteration++;
-				
-			}
-			System.out.println("Best solution of GA: " + population.getFittest(0).toString());
 			
 			// Fifth step: Starts the simulation
 			CloudSim.startSimulation();
@@ -473,6 +430,10 @@ public class CloudSimulationExample {
 	    Log.printLine("Total Scheduling Length: " + scheduling_length);
 	    
 	    //CPU Resource Utilization
+	    double totalTimeRU = 0.0;
+	    for (int i = 0; i < size; i++) {
+			totalTimeRU = cloudletList.get(i).getActualCPUTime();	
+		}
 	    double resource_utilization = (CPUTimeSum / (makespan_total * 54)) * 100;
 	    Log.printLine("Resouce Utilization: " + resource_utilization);
 	 
