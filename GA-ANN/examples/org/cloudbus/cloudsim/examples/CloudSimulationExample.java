@@ -166,7 +166,7 @@ public class CloudSimulationExample {
 
 			//Fourth step: Create VMs and Cloudlets and send them to broker
 			vmlist = createVM(brokerId,54); //creating vms
-			cloudletList = createCloudlet(brokerId,54); // creating cloudlets
+			cloudletList = createCloudlet(brokerId,9); // creating cloudlets
 
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);

@@ -340,27 +340,27 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=4;
+						    	newGene=3;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=5;
+						    	newGene=4;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=6;
+						    	newGene=5;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=8;
+						    	newGene=6;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 					    	else
 						    {
-						    	newGene=10;
+						    	newGene=8;
 						    }
 						}
 						else if (individual.getGene(geneIndex) == 1) {
@@ -375,27 +375,27 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=4;
+						    	newGene=3;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=5;
+						    	newGene=4;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=6;
+						    	newGene=5;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=8;
+						    	newGene=6;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 					    	else
 						    {
-						    	newGene=10;
+						    	newGene=8;
 						    }
 						}
 						else if (individual.getGene(geneIndex) == 2) {
@@ -410,27 +410,62 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=4;
+						    	newGene=3;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=5;
+						    	newGene=4;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=6;
+						    	newGene=5;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=8;
+						    	newGene=6;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 					    	else
 						    {
-						    	newGene=10;
+						    	newGene=8;
+						    }
+						}
+						else if (individual.getGene(geneIndex) == 3) {
+							double r=Math.random();
+						    if(r<0.125)
+						    {
+						    	newGene=0;
+						    }
+						    else if(r>0.125 && r<0.250)
+						    {
+						    	newGene=1;
+						    }
+						    else if(r>0.250 && r<0.375)
+						    {
+						    	newGene=2;
+						    }
+						    else if(r>0.375 && r<0.5)
+						    {
+						    	newGene=4;
+						    }
+						    else if(r>0.5 && r<0.625)
+						    {
+						    	newGene=5;
+						    }
+						    else if(r>0.625 && r<0.75)
+						    {
+						    	newGene=6;
+						    }
+						    else if(r>0.75 && r<0.875)
+						    {
+						    	newGene=7;
+						    }
+					    	else
+						    {
+						    	newGene=8;
 						    }
 						}
 						else if (individual.getGene(geneIndex) == 4) {
@@ -449,23 +484,23 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=5;
+						    	newGene=3;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=6;
+						    	newGene=5;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=8;
+						    	newGene=6;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 					    	else
 						    {
-						    	newGene=10;
+						    	newGene=8;
 						    }
 						}
 						else if (individual.getGene(geneIndex) == 5) {
@@ -484,23 +519,23 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=3;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=6;
+						    	newGene=4;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=8;
+						    	newGene=6;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 					    	else
 						    {
-						    	newGene=10;
+						    	newGene=8;
 						    }
 						}
 						else if (individual.getGene(geneIndex) == 6) {
@@ -519,23 +554,58 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=3;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
+						    	newGene=4;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=8;
+						    	newGene=5;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 					    	else
 						    {
-						    	newGene=10;
+						    	newGene=8;
+						    }
+						}
+						else if (individual.getGene(geneIndex) == 7) {
+							double r=Math.random();
+						    if(r<0.125)
+						    {
+						    	newGene=0;
+						    }
+						    else if(r>0.125 && r<0.250)
+						    {
+						    	newGene=1;
+						    }
+						    else if(r>0.250 && r<0.375)
+						    {
+						    	newGene=2;
+						    }
+						    else if(r>0.375 && r<0.5)
+						    {
+						    	newGene=3;
+						    }
+						    else if(r>0.5 && r<0.625)
+						    {
+						    	newGene=4;
+						    }
+						    else if(r>0.625 && r<0.75)
+						    {
+						    	newGene=5;
+						    }
+						    else if(r>0.75 && r<0.875)
+						    {
+						    	newGene=6;
+						    }
+					    	else
+						    {
+						    	newGene=8;
 						    }
 						}
 						else if (individual.getGene(geneIndex) == 8) {
@@ -554,93 +624,23 @@ public class GeneticAlgorithm {
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=3;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
-						    }
-						    else if(r>0.625 && r<0.75)
-						    {
-						    	newGene=6;
-						    }
-						    else if(r>0.75 && r<0.875)
-						    {
-						    	newGene=9;
-						    }
-					    	else
-						    {
-						    	newGene=10;
-						    }
-						}
-						else if (individual.getGene(geneIndex) == 9) {
-							double r=Math.random();
-						    if(r<0.125)
-						    {
-						    	newGene=0;
-						    }
-						    else if(r>0.125 && r<0.250)
-						    {
-						    	newGene=1;
-						    }
-						    else if(r>0.250 && r<0.375)
-						    {
-						    	newGene=2;
-						    }
-						    else if(r>0.375 && r<0.5)
-						    {
 						    	newGene=4;
 						    }
-						    else if(r>0.5 && r<0.625)
+						    else if(r>0.625 && r<0.75)
 						    {
 						    	newGene=5;
 						    }
-						    else if(r>0.625 && r<0.75)
+						    else if(r>0.75 && r<0.875)
 						    {
 						    	newGene=6;
 						    }
-						    else if(r>0.75 && r<0.875)
-						    {
-						    	newGene=8;
-						    }
 					    	else
 						    {
-						    	newGene=10;
-						    }
-						}
-						else if (individual.getGene(geneIndex) == 10) {
-							double r=Math.random();
-						    if(r<0.125)
-						    {
-						    	newGene=0;
-						    }
-						    else if(r>0.125 && r<0.250)
-						    {
-						    	newGene=1;
-						    }
-						    else if(r>0.250 && r<0.375)
-						    {
-						    	newGene=2;
-						    }
-						    else if(r>0.375 && r<0.5)
-						    {
-						    	newGene=4;
-						    }
-						    else if(r>0.5 && r<0.625)
-						    {
-						    	newGene=5;
-						    }
-						    else if(r>0.625 && r<0.75)
-						    {
-						    	newGene=6;
-						    }
-						    else if(r>0.75 && r<0.875)
-						    {
-						    	newGene=8;
-						    }
-					    	else
-						    {
-						    	newGene=9;
+						    	newGene=7;
 						    }
 						}
 						// Mutate gene

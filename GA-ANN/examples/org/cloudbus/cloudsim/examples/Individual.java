@@ -49,17 +49,13 @@ public class Individual {
 	public Individual(int chromosomeLength) {
 
 		this.chromosome = new int[chromosomeLength];
-        int max = 11;
+        int max = 8;
         int min = 0;
         int range = max - min + 1;
  
-        // generate random numbers within 0 to 11
+        // generate random numbers within 0 to 8
         for (int gene = 0; gene < chromosomeLength; gene++) {
             int rand = (int)(Math.random() * range) + min;
-            if (rand == 3 || rand == 7 || rand == 11) {
-                gene--;
-                continue;
-            }
             this.setGene(gene, rand);
         }
 	}
