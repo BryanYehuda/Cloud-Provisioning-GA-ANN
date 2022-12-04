@@ -146,7 +146,6 @@ public class CloudSimulationExample {
 			
 			//Second step: Create Datacenters
 			//Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation
-
 			datacenter1 = createDatacenter("DataCenter_1", hostId);
 			hostId = 3;
 			datacenter2 = createDatacenter("DataCenter_2", hostId);
@@ -164,65 +163,79 @@ public class CloudSimulationExample {
 			DatacenterBroker broker = createBroker();
 			int brokerId = broker.getId();
 
-			//Fourth step: Create VMs and Cloudlets and send them to broker
+			
+			//Fourth step: Create VMs and Cloudlets 
 			vmlist = createVM(brokerId,54); //creating vms
-			cloudletList = createCloudlet(brokerId,9); // creating cloudlets
-
+			cloudletList = createCloudlet(brokerId,1000); // creating cloudlets
+			
+			
+			//Fifth step: Send VMs and Cloudlets to broker 
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);
 			
-			//Sixth step GeneticAlgorithm
-			GeneticAlgorithm ga = new GeneticAlgorithm(20, 0.30, 0.95, 2, cloudletList, vmlist);
-
-			// Initialize population
-			System.out.println("Population Initialization");
-			int chromosomeLength = 9;
-			Population population = ga.initPopulation(chromosomeLength);
-
-			// Evaluate population
-			ga.evalPopulation(population);
+			//Sixth step: Use Genetic Algorithm
+			int chromosomeLength = 9; //number of genes inside a chromosome
+			int cloudletLoopingNumber = 1000/54 - 1; //number of iteration
 			
-			int iteration = 1;
-			while (iteration <= 15) 
-			{	
-				// get fittest individual from population in every iteration
-				Individual fit = population.getFittest(0);
-				
-				System.out.print("Fittest: ");
-				for(int j=0;j<9;j++) {
-					System.out.print(fit.chromosome[j] + " ");
-				}
-				System.out.println("  fitness => " + fit.getFitness());
-
-				// Apply crossover
-				population = ga.crossoverPopulation(population);
-
-				// Apply mutation
-				population = ga.mutatePopulation(population);
-
-				// Evaluate population
-				ga.evalPopulation(population);
-
-				// Increment the current generation
-				iteration++;
-				
-			}
-			System.out.println("Best solution of GA: " + population.getFittest(0));
-			System.out.println("Highest Fitness Achieved: " + population.getFittest(0).getFitness());
-			//System.out.println(population.getFittest(0).getGene(0));
-			
-			for (int iterator=0; iterator<9; iterator++)
+			for (int cloudletIterator=0; cloudletIterator<=cloudletLoopingNumber; cloudletIterator++)
 			{
-				broker.bindCloudletToVm(iterator, population.getFittest(0).getGene(iterator));
+				System.out.println("Cloudlet Iteration Number " + cloudletIterator);
+				for (int dataCenterIterator = 1; dataCenterIterator <= 6; dataCenterIterator++)
+				{
+					// Initialize Genetic Algorithm
+					GeneticAlgorithm ga = new GeneticAlgorithm(20, 0.3, 0.95, 2, cloudletList, vmlist);
+					
+					// Initialize population
+					System.out.println("Datacenter " + dataCenterIterator + " Population Initialization");
+					Population population = ga.initPopulation(chromosomeLength, dataCenterIterator);
+					
+					// Evaluate population
+					ga.evalPopulation(population, dataCenterIterator, cloudletIterator);
+					
+					// Genetic Algorithm Iteration
+					int iteration = 1;
+					while (iteration <= 15) 
+					{	
+						// get fittest individual from population in every iteration
+						Individual fit = population.getFittest(0);
+						
+						System.out.print("Fittest: ");
+						for(int j=0;j<9;j++) {
+							System.out.print(fit.chromosome[j] + " ");
+						}
+						System.out.println("  fitness => " + fit.getFitness());
+
+						// Apply crossover
+						population = ga.crossoverPopulation(population, dataCenterIterator);
+
+						// Apply mutation
+						population = ga.mutatePopulation(population, dataCenterIterator);
+
+						// Evaluate population
+						ga.evalPopulation(population, dataCenterIterator, cloudletIterator);
+
+						// Increment the current generation
+						iteration++;
+					}
+					// get fittest individual from Genetic Algorithm
+					System.out.println("Best solution of GA: " + population.getFittest(0) + " For Datacenter-" + dataCenterIterator);
+					System.out.println("Highest Fitness Achieved: " + population.getFittest(0).getFitness());
+					
+					// Assign Cloudlet to their respective VMs
+					for (int assigner=0+(dataCenterIterator-1)*9 + cloudletIterator*54; assigner<9+(dataCenterIterator-1)*9 + cloudletIterator*54; assigner++)
+					{
+						broker.bindCloudletToVm(assigner, population.getFittest(0).getGene(assigner%9));
+					}
+				}
 			}
 			
-			// Fifth step: Starts the simulation
+			
+			// Seventh step: Starts the simulation
 			CloudSim.startSimulation();
 
 			// Final step: Print results when simulation is over
 			List<Cloudlet> newList = broker.getCloudletReceivedList();
-			
-
+		
 			CloudSim.stopSimulation();
 
 			printCloudletList(newList);
@@ -245,6 +258,7 @@ public class CloudSimulationExample {
 		//    Machines
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
 
+		
 		// 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
 		//    create a list to store these PEs before creating
 		//    a Machine.
@@ -332,10 +346,7 @@ public class CloudSimulationExample {
 		// 6. Finally, we need to create a PowerDatacenter object.
 		PowerDatacenter datacenter = null;
 		try {
-			//datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
-			datacenter = new PowerDatacenter(name, characteristics, new PowerVmAllocationPolicySimple(hostList),
-					storageList, 9); // 15 --> is the cloud scheduling interval
-//			datacenter.setDisableMigrations(false);
+			datacenter = new PowerDatacenter(name, characteristics, new PowerVmAllocationPolicySimple(hostList), storageList, 9); // 15 --> is the cloud scheduling interval
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -401,12 +412,11 @@ public class CloudSimulationExample {
 	    }
 	    DoubleSummaryStatistics stats = DoubleStream.of(response_time).summaryStatistics();
 	     
-	    // Show the parameters of the questions 2 and 3
+	    // Show the parameters
 	    Log.printLine();
 	    System.out.println("min = " + stats.getMin());
 	    System.out.println("Response_Time: " + CPUTimeSum/totalValues);
 	     	    
-	     
 	    Log.printLine();
 	    Log.printLine("TotalCPUTime : "             + CPUTimeSum);
 	    Log.printLine("TotalWaitTime : "            + waitTimeSum);
@@ -414,7 +424,7 @@ public class CloudSimulationExample {
 	    Log.printLine();
 	    Log.printLine();
 
-	     
+	  
 	   //Average Cloudlets Finished 
 	    Log.printLine("AverageCloudletsFinished : " + (CPUTimeSum/ totalValues));
 

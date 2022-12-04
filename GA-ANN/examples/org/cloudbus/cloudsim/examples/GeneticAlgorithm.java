@@ -73,9 +73,9 @@ public class GeneticAlgorithm {
 	 *            The length of the individuals chromosome
 	 * @return population The initial population generated
 	 */
-	public Population initPopulation(int chromosomeLength) {
+	public Population initPopulation(int chromosomeLength, int dataCenterIterator) {
 		// Initialize population
-		Population population = new Population(this.populationSize, chromosomeLength);
+		Population population = new Population(this.populationSize, chromosomeLength, dataCenterIterator);
 		return population;
 	}
 	
@@ -137,35 +137,38 @@ public class GeneticAlgorithm {
 	 *            the individual to evaluate
 	 * @return double The fitness value for individual
 	 */
-	public double calcFitness(Individual individual) {
+	public double calcFitness(Individual individual, int dataCenterIterator, int cloudletIteration) {
 
 		double totalExecutionTime = 0;
 		double mips = 0;
 		double failureRate = 0.04847468455;
+		int iterator=0;
+		dataCenterIterator = dataCenterIterator-1;
 		
-		for (int i=0; i<9; i++)
+		for (int i=0 + dataCenterIterator*9 + cloudletIteration*54; i<9 + dataCenterIterator*9 + cloudletIteration*54; i++)
 		{
-			int gene = individual.getGene(i);
-			if (gene == 0 || gene == 1 || gene == 2) 
+			int gene = individual.getGene(iterator);
+			if (gene%9 == 0 || gene%9 == 1 || gene%9 == 2) 
 			{
 				mips = 400;
-			}else if (gene == 4 || gene == 5 || gene == 6) 
+			}else if (gene%9 == 3 || gene%9 == 4 || gene%9 == 5) 
 			{
 				mips = 500;
-			}else if (gene == 8 || gene == 9 || gene == 10)
+			}else if (gene%9 == 6 || gene%9 == 7 || gene%9 == 8)
 			{
 				mips = 600;
 			}else break;
 			
 			//Log.printLine("Gene " + gene);
 			totalExecutionTime = totalExecutionTime + cloudletList.get(i).getCloudletLength() / mips;
+			iterator++;
 		}
 		
 		int random = getRandomPoisson(failureRate);
-        double x=(getPoisson(failureRate, random, 9));
+        double poisson=(getPoisson(failureRate, random, 9));
 
 		// Calculate fitness
-		double fitness = 0.9 * totalExecutionTime + 0.1 * (1/x);
+		double fitness = 0.95 * (1/totalExecutionTime) + 0.05 * (1/poisson);
 		//Log.printLine("Fitness " + fitness);
 
 		// Store fitness
@@ -185,14 +188,14 @@ public class GeneticAlgorithm {
 	 * @param population
 	 *            the population to evaluate
 	 */
-	public void evalPopulation(Population population) {
+	public void evalPopulation(Population population, int dataCenterIterator, int cloudletIteration) {
 		
 		// Loop over population evaluating individuals and suming population fitness
 		double populationFitness=0;
 
 		for (Individual individual : population.getIndividuals()) {
 
-			double individualFitness = calcFitness(individual); 
+			double individualFitness = calcFitness(individual, dataCenterIterator, cloudletIteration); 
 			individual.setFitness(individualFitness);
 			populationFitness+=individualFitness;
 		
@@ -221,7 +224,7 @@ public class GeneticAlgorithm {
 	public Individual selectParent(Population population) {
 		// Get individuals
 		Individual individuals[] = population.getIndividuals();
-
+		
 		// Spin roulette wheel
 		double populationFitness = population.getPopulationFitness();
 		double rouletteWheelPosition = Math.random() * populationFitness;
@@ -259,7 +262,7 @@ public class GeneticAlgorithm {
 	 *            The population to apply crossover to
 	 * @return The new population
 	 */
-	public Population crossoverPopulation(Population population) {
+	public Population crossoverPopulation(Population population, int dataCenterIterator) {
 		// Create new population
 		Population newPopulation = new Population(population.size());
 
@@ -270,7 +273,7 @@ public class GeneticAlgorithm {
 			// Apply crossover to this individual?
 			if (this.crossoverRate > Math.random()&& populationIndex > this.elitismCount ) {
 				// Initialize offspring
-				Individual offspring = new Individual(parent1.getChromosomeLength());
+				Individual offspring = new Individual(parent1.getChromosomeLength(), dataCenterIterator);
 				
 				// Find second parent
 				Individual parent2 = selectParent(population);
@@ -312,9 +315,10 @@ public class GeneticAlgorithm {
 	 *            The population to apply mutation to
 	 * @return The mutated population
 	 */
-	public Population mutatePopulation(Population population) {
+	public Population mutatePopulation(Population population, int dataCenterIterator) {
 		// Initialize new population
 		Population newPopulation = new Population(this.populationSize);
+		dataCenterIterator = dataCenterIterator - 1;
 
 		// Loop over current population by fitness
 		for (int populationIndex = 0; populationIndex < population.size(); populationIndex++) {
@@ -327,320 +331,320 @@ public class GeneticAlgorithm {
 					// Does this gene need mutation?
 					if (this.mutationRate > Math.random()) {
 						// Get new gene
-						int newGene=0;
-						if (individual.getGene(geneIndex) == 0) {
+						int newGene=0 + 9 * dataCenterIterator;
+						if (individual.getGene(geneIndex)%9 == 0) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 1) {
+						else if (individual.getGene(geneIndex)%9 == 1) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 2) {
+						else if (individual.getGene(geneIndex)%9 == 2) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 3) {
+						else if (individual.getGene(geneIndex)%9 == 3) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 4) {
+						else if (individual.getGene(geneIndex)%9 == 4) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator; 
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 5) {
+						else if (individual.getGene(geneIndex)%9 == 5) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 6) {
+						else if (individual.getGene(geneIndex)%9 == 6) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 7) {
+						else if (individual.getGene(geneIndex)%9 == 7) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=8;
+						    	newGene=8 + 9 * dataCenterIterator;
 						    }
 						}
-						else if (individual.getGene(geneIndex) == 8) {
+						else if (individual.getGene(geneIndex)%9 == 8) {
 							double r=Math.random();
 						    if(r<0.125)
 						    {
-						    	newGene=0;
+						    	newGene=0 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.125 && r<0.250)
 						    {
-						    	newGene=1;
+						    	newGene=1 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.250 && r<0.375)
 						    {
-						    	newGene=2;
+						    	newGene=2 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.375 && r<0.5)
 						    {
-						    	newGene=3;
+						    	newGene=3 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.5 && r<0.625)
 						    {
-						    	newGene=4;
+						    	newGene=4 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.625 && r<0.75)
 						    {
-						    	newGene=5;
+						    	newGene=5 + 9 * dataCenterIterator;
 						    }
 						    else if(r>0.75 && r<0.875)
 						    {
-						    	newGene=6;
+						    	newGene=6 + 9 * dataCenterIterator;
 						    }
 					    	else
 						    {
-						    	newGene=7;
+						    	newGene=7 + 9 * dataCenterIterator;
 						    }
 						}
 						// Mutate gene

@@ -46,11 +46,12 @@ public class Individual {
 	 * @param chromosomeLength
 	 *            The length of the individuals chromosome
 	 */
-	public Individual(int chromosomeLength) {
+	public Individual(int chromosomeLength, int dataCenterIterator) {
 
 		this.chromosome = new int[chromosomeLength];
-        int max = 8;
-        int min = 0;
+		dataCenterIterator = dataCenterIterator-1;
+        int max = 8 + 9 * dataCenterIterator;
+        int min = 0 + 9 * dataCenterIterator;
         int range = max - min + 1;
  
         // generate random numbers within 0 to 8

@@ -36,14 +36,14 @@ public class Population {
 	 * @param chromosomeLength
 	 *            The size of each individual's chromosome
 	 */
-	public Population(int populationSize, int chromosomeLength) {
+	public Population(int populationSize, int chromosomeLength, int dataCenterIterator) {
 		// Initialize the population as an array of individuals
 		this.population = new Individual[populationSize];
 
 		// Create each individual in turn
 		for (int individualCount = 0; individualCount < populationSize; individualCount++) {
 			// Create an individual, initializing its chromosome to the given length
-			Individual individual = new Individual(chromosomeLength);
+			Individual individual = new Individual(chromosomeLength, dataCenterIterator);
 			// Add individual to population
 			this.population[individualCount] = individual;
 		}
