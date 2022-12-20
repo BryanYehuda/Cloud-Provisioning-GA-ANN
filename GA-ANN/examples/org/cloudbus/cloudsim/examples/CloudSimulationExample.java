@@ -5,7 +5,6 @@ package org.cloudbus.cloudsim.examples;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
@@ -81,11 +80,11 @@ public class CloudSimulationExample {
 		
 		// Creating an arraylist to store Cloudlet Datasets
 		ArrayList<Integer> seed = new ArrayList<Integer>();
-		Log.printLine(System.getProperty("user.dir")+ "/RandomDataset");
+		Log.printLine(System.getProperty("user.dir")+ "/RandomDataset.txt");
 		
 		try{
 			// Opening and scanning the file
-			File fobj = new File(System.getProperty("user.dir")+ "/RandomDataset");
+			File fobj = new File(System.getProperty("user.dir")+ "/RandomDataset.txt");
 			java.util.Scanner readFile = new java.util.Scanner(fobj);
 			
 			while(readFile.hasNextLine() && cloudletcount>0)
@@ -145,8 +144,8 @@ public class CloudSimulationExample {
 			Calendar calendar = Calendar.getInstance();
 			boolean trace_flag = false;  // Mean trace events
 			int hostId=0; // Starting host ID
-			//BufferedWriter outputWriter = null;
-			//outputWriter = new BufferedWriter(new FileWriter("filename.txt")); //Save output to text file
+			BufferedWriter outputWriter = null;
+			outputWriter = new BufferedWriter(new FileWriter("filename.txt")); //Save output to text file
 			int vmNumber = 54; // The number of VMs created
 			int cloudletNumber = 10000; // The number of Tasks created
 
@@ -238,12 +237,14 @@ public class CloudSimulationExample {
 					{
 						broker.bindCloudletToVm(assigner, population.getFittest(0).getGene(assigner%9));
 						//outputWriter.write(Long.toString(cloudletList.get(assigner).getCloudletLength())); // Print Cloudlet Length
-						//outputWriter.write(Long.toString(population.getFittest(0).getGene(assigner%9)%9)); // Print Assigned VM ID %
+						outputWriter.write(Long.toString(population.getFittest(0).getGene(assigner%9)%9)); // Print Assigned VM ID %
+						outputWriter.write(" ");
 						//if (assigner%9<8)
 						//{
 						//	outputWriter.write(",");
 						//}
 					}	
+					outputWriter.newLine();
 					//outputWriter.write("}");
 				}
 			}
@@ -252,7 +253,8 @@ public class CloudSimulationExample {
 			// Seventh step: Starts the simulation
 			CloudSim.startSimulation();
 
-			
+			outputWriter.flush();
+			outputWriter.close();
 			// Final step: Print results when simulation is over
 			List<Cloudlet> newList = broker.getCloudletReceivedList();
 		
