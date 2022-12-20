@@ -2,8 +2,12 @@ package org.cloudbus.cloudsim.examples;
 
 
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -54,37 +58,39 @@ public class CloudSimulationExample {
 		LinkedList<Vm> list = new LinkedList<Vm>();
 
 		//VM Parameters
-		long size = 10000; //image size (MB)
-		int[] ram = {512,1024,2048}; //vm memory (MB)
-		int[] mips = {400,500,600}; //vm processing power
-		long bw = 1000; //vm bandwith
-		int pesNumber = 1; //number of cpus
+		long size = 10000; //Image size (MB)
+		int[] ram = {512,1024,2048}; //VM memory (MB)
+		int[] mips = {400,500,600}; //VM processing power (MIPS)
+		long bw = 1000; //VM bandwith
+		int pesNumber = 1; //Number of cpus
 		String vmm = "Xen"; //VMM name
-		
 		
 		//create VMs
 		Vm[] vm = new Vm[vms];
 
 		for(int i=0;i<vms;i++){
-			//for creating a VM with a time shared scheduling policy for cloudlets:
+			//For loop to create a VM with a time shared scheduling policy for cloudlets:
 			vm[i] = new Vm(i, userId, mips[i%3], pesNumber, ram[i%3], bw, size, vmm, new CloudletSchedulerSpaceShared());
 			list.add(vm[i]);
 		}
 		
-	
 		return list;
 	}
 
 	private static ArrayList<Integer> getSeedValue(int cloudletcount){
+		
+		// Creating an arraylist to store Cloudlet Datasets
 		ArrayList<Integer> seed = new ArrayList<Integer>();
 		Log.printLine(System.getProperty("user.dir")+ "/RandomDataset");
 		
 		try{
+			// Opening and scanning the file
 			File fobj = new File(System.getProperty("user.dir")+ "/RandomDataset");
 			java.util.Scanner readFile = new java.util.Scanner(fobj);
 			
 			while(readFile.hasNextLine() && cloudletcount>0)
 			{
+				// Adding the file to the arraylist
 				seed.add(readFile.nextInt());
 				cloudletcount--;
 			}
@@ -104,18 +110,18 @@ public class CloudSimulationExample {
 		// Creates a container to store Cloudlets
 		LinkedList<Cloudlet> list = new LinkedList<Cloudlet>();
 
-		//cloudlet parameters
-		long length = 1000;
-		long fileSize = 300;
-		long outputSize = 300;
-		int pesNumber = 1;
+		//Cloudlet parameters
+		long length = 1000; // Cloudlet length (MI)
+		long fileSize = 300; // Cloudlet file size (MB)
+		long outputSize = 300; // Cloudlet file size (MB)
+		int pesNumber = 1; // Cloudlet CPU needed to process
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
 		Cloudlet[] cloudlet = new Cloudlet[cloudlets];
 
 		for(int i=0;i<cloudlets;i++){
 			long finalLen = length + randomSeed.get(i);
-			
+			// Creating the cloudlet with all the parameter listed
 			cloudlet[i] = new Cloudlet(i, finalLen, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
 			
 			// setting the owner of these Cloudlets
@@ -135,17 +141,21 @@ public class CloudSimulationExample {
 		try {
 			// First step: Initialize the CloudSim package. It should be called
 			// before creating any entities.
-			int num_user = 1;   // number of grid users
+			int num_user = 1;   // Number of grid users
 			Calendar calendar = Calendar.getInstance();
-			boolean trace_flag = false;  // mean trace events
-			int hostId=0;
+			boolean trace_flag = false;  // Mean trace events
+			int hostId=0; // Starting host ID
+			//BufferedWriter outputWriter = null;
+			//outputWriter = new BufferedWriter(new FileWriter("filename.txt")); //Save output to text file
+			int vmNumber = 54; // The number of VMs created
+			int cloudletNumber = 10000; // The number of Tasks created
 
 			// Initialize the CloudSim library
 			CloudSim.init(num_user, calendar, trace_flag);
 			
 			
 			//Second step: Create Datacenters
-			//Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation
+			//Datacenters are the resource providers in CloudSim. We need at least one of them to run a CloudSim simulation
 			datacenter1 = createDatacenter("DataCenter_1", hostId);
 			hostId = 3;
 			datacenter2 = createDatacenter("DataCenter_2", hostId);
@@ -158,24 +168,25 @@ public class CloudSimulationExample {
 			hostId = 15;
 			datacenter6 = createDatacenter("DataCenter_6", hostId);
 			
-
+			
 			//Third step: Create Broker
 			DatacenterBroker broker = createBroker();
 			int brokerId = broker.getId();
 
 			
 			//Fourth step: Create VMs and Cloudlets 
-			vmlist = createVM(brokerId,54); //creating vms
-			cloudletList = createCloudlet(brokerId,1000); // creating cloudlets
+			vmlist = createVM(brokerId,vmNumber); //Creating vms
+			cloudletList = createCloudlet(brokerId,cloudletNumber); // Creating cloudlets
 			
 			
-			//Fifth step: Send VMs and Cloudlets to broker 
+			//Fifth step: Send VMs and Cloudlets to broker 	
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);
 			
+			
 			//Sixth step: Use Genetic Algorithm
 			int chromosomeLength = 9; //number of genes inside a chromosome
-			int cloudletLoopingNumber = 1000/54 - 1; //number of iteration
+			int cloudletLoopingNumber = cloudletNumber/vmNumber - 1; //number of iteration needed to process the dataset
 			
 			for (int cloudletIterator=0; cloudletIterator<=cloudletLoopingNumber; cloudletIterator++)
 			{
@@ -217,15 +228,23 @@ public class CloudSimulationExample {
 						// Increment the current generation
 						iteration++;
 					}
-					// get fittest individual from Genetic Algorithm
+					// Get the fittest individual from Genetic Algorithm
 					System.out.println("Best solution of GA: " + population.getFittest(0) + " For Datacenter-" + dataCenterIterator);
 					System.out.println("Highest Fitness Achieved: " + population.getFittest(0).getFitness());
 					
-					// Assign Cloudlet to their respective VMs
+					// Assign Cloudlet to their respective VMs according to the fittest individual's chromosome
+					//outputWriter.write("{");
 					for (int assigner=0+(dataCenterIterator-1)*9 + cloudletIterator*54; assigner<9+(dataCenterIterator-1)*9 + cloudletIterator*54; assigner++)
 					{
 						broker.bindCloudletToVm(assigner, population.getFittest(0).getGene(assigner%9));
-					}
+						//outputWriter.write(Long.toString(cloudletList.get(assigner).getCloudletLength())); // Print Cloudlet Length
+						//outputWriter.write(Long.toString(population.getFittest(0).getGene(assigner%9)%9)); // Print Assigned VM ID %
+						//if (assigner%9<8)
+						//{
+						//	outputWriter.write(",");
+						//}
+					}	
+					//outputWriter.write("}");
 				}
 			}
 			
@@ -233,6 +252,7 @@ public class CloudSimulationExample {
 			// Seventh step: Starts the simulation
 			CloudSim.startSimulation();
 
+			
 			// Final step: Print results when simulation is over
 			List<Cloudlet> newList = broker.getCloudletReceivedList();
 		
@@ -254,20 +274,18 @@ public class CloudSimulationExample {
 	private static PowerDatacenter createDatacenter(String name, int hostId){
 
 		// Here are the steps needed to create a PowerDatacenter:
-		// 1. We need to create a list to store one or more
-		//    Machines
+		// 1. We need to create a list to store one or more machines
 		List<PowerHost> hostList = new ArrayList<PowerHost>();
 
 		
 		// 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
-		//    create a list to store these PEs before creating
-		//    a Machine.
+		// create a list to store these PEs before creating a Machine.
 		List<Pe> peList1 = new ArrayList<Pe>();
 		List<Pe> peList2 = new ArrayList<Pe>();
 		List<Pe> peList3 = new ArrayList<Pe>();
 
-		int mipsunused= 300;
-		int mips1 = 400; //Must be bigger than the VMs
+		int mipsunused= 300; // Unused core, only 3 cores will be able to process Cloudlets for this simulation
+		int mips1 = 400; // The MIPS Must be bigger than the VMs
 		int mips2 = 500;
 		int mips3 = 600;
 		
@@ -289,9 +307,9 @@ public class CloudSimulationExample {
 	
 
 		//4. Create Hosts with its id and list of PEs and add them to the list of machines
-		int ram = 128000 ; //host memory (MB), Must be bigger than the VMs
-		long storage = 1000000; //host storage
-		int bw = 10000; //host bandwith
+		int ram = 128000 ; //Host memory (MB), Must be bigger than the VMs
+		long storage = 1000000; //Host storage (MB)
+		int bw = 10000; //Host bandwith
 		int maxpower = 117; // Host Max Power
 		int staticPowerPercentage = 50; // Host Static Power Percentage
 
@@ -326,17 +344,17 @@ public class CloudSimulationExample {
 
 
 		// 5. Create a DatacenterCharacteristics object that stores the
-		//    properties of a data center: architecture, OS, list of
-		//    Machines, allocation policy: time- or space-shared, time zone
-		//    and its price (G$/Pe time unit).
-		String arch = "x86";      		// system architecture
-		String os = "Linux";          	// operating system
-		String vmm = "Xen";				// name
-		double time_zone = 10.0;        // time zone this resource located
-		double cost = 3.0;              // the cost of using processing in this resource
-		double costPerMem = 0.05;		// the cost of using memory in this resource
-		double costPerStorage = 0.1;	// the cost of using storage in this resource
-		double costPerBw = 0.1;			// the cost of using bw in this resource
+		// properties of a data center: architecture, OS, list of
+		// Machines, allocation policy: time- or space-shared, time zone
+		// and its price (G$/Pe time unit).
+		String arch = "x86";      		// System architecture
+		String os = "Linux";          	// Operating system
+		String vmm = "Xen";				// Name
+		double time_zone = 10.0;        // Time zone this resource located
+		double cost = 3.0;              // The cost of using processing in this resource
+		double costPerMem = 0.05;		// The cost of using memory in this resource
+		double costPerStorage = 0.1;	// The cost of using storage in this resource
+		double costPerBw = 0.1;			// The cost of using bw in this resource
 		LinkedList<Storage> storageList = new LinkedList<Storage>();
 
 		DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
@@ -376,7 +394,7 @@ public class CloudSimulationExample {
 	 */
 	private static void printCloudletList(List<Cloudlet> list) throws FileNotFoundException {
 		
-		
+		// Initializing the printed output to zero
 		int size = list.size();
 		Cloudlet cloudlet = null;
 
@@ -393,7 +411,8 @@ public class CloudSimulationExample {
 	    DecimalFormat dft  = new DecimalFormat("###.##");
 	     
 	    double response_time[] = new double[size];
-	     
+	    
+	    // Printing all the status of the Cloudlets
 	    for (int i = 0; i < size; i++) {
 	    	cloudlet = list.get(i);
 	        Log.print(cloudlet.getCloudletId() + indent + indent);
@@ -412,7 +431,7 @@ public class CloudSimulationExample {
 	    }
 	    DoubleSummaryStatistics stats = DoubleStream.of(response_time).summaryStatistics();
 	     
-	    // Show the parameters
+	    // Show the parameters and print them out
 	    Log.printLine();
 	    System.out.println("min = " + stats.getMin());
 	    System.out.println("Response_Time: " + CPUTimeSum/totalValues);

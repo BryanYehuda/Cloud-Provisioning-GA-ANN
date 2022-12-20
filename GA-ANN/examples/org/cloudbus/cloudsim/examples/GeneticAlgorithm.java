@@ -148,13 +148,13 @@ public class GeneticAlgorithm {
 		for (int i=0 + dataCenterIterator*9 + cloudletIteration*54; i<9 + dataCenterIterator*9 + cloudletIteration*54; i++)
 		{
 			int gene = individual.getGene(iterator);
-			if (gene%9 == 0 || gene%9 == 1 || gene%9 == 2) 
+			if (gene%9 == 0 || gene%9 == 3 || gene%9 == 6) 
 			{
 				mips = 400;
-			}else if (gene%9 == 3 || gene%9 == 4 || gene%9 == 5) 
+			}else if (gene%9 == 1 || gene%9 == 4 || gene%9 == 7) 
 			{
 				mips = 500;
-			}else if (gene%9 == 6 || gene%9 == 7 || gene%9 == 8)
+			}else if (gene%9 == 2 || gene%9 == 5 || gene%9 == 8)
 			{
 				mips = 600;
 			}else break;
@@ -168,7 +168,7 @@ public class GeneticAlgorithm {
         double poisson=(getPoisson(failureRate, random, 9));
 
 		// Calculate fitness
-		double fitness = 0.95 * (1/totalExecutionTime) + 0.05 * (1/poisson);
+		double fitness = 0.90 * (1/totalExecutionTime) + 0.1 * (1/poisson);
 		//Log.printLine("Fitness " + fitness);
 
 		// Store fitness
