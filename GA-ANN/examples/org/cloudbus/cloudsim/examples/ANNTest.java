@@ -4,11 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Scanner;
 
-import org.cloudbus.cloudsim.Log;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationReLU;
 import org.encog.engine.network.activation.ActivationSigmoid;
@@ -18,11 +15,11 @@ import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
-import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.neural.networks.training.propagation.quick.QuickPropagation;
 import org.encog.persist.EncogDirectoryPersistence;
 import org.encog.util.arrayutil.NormalizationAction;
-import org.encog.util.arrayutil.NormalizeArray;
 import org.encog.util.arrayutil.NormalizedField;
 
 /**
@@ -39,25 +36,27 @@ import org.encog.util.arrayutil.NormalizedField;
  */
 public class ANNTest {
 	
+	// Double Array to hold the raw length data
 	public static double LENGTH_RAW_DATA[][];
 	
+	// Double Array to hold the raw target data
 	public static double TARGET_RAW_DATA[][];	
 	
 	public static double[][] Reading2DArrayFromFileLength()
 	{
 		Scanner scannerLength;
-		int rows = 888;
-		int columns = 9;
+		int rows = 89; // Number of rows to be scanned
+		int columns = 9; // Number of columns to be scanned
 		double [][] arrayLength = new double[rows][columns];
 		
 		try 
 		{
-			scannerLength = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/DatasetLength.txt")));
+			scannerLength = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/train/DatasetLength-1000.txt")));
 			while(scannerLength.hasNextLine()) {
 			    for (int i=0; i<arrayLength.length; i++) {
-			       String[] line = scannerLength.nextLine().trim().split(" ");
+			       String[] line = scannerLength.nextLine().trim().split(" "); // Splitting the dataset
 			          for (int j=0; j<line.length; j++) {
-			        	  arrayLength[i][j] = Integer.parseInt(line[j]);
+			        	  arrayLength[i][j] = Integer.parseInt(line[j]); // Parsing String to Integer and save to array
 			          }
 			    }
 			}
@@ -71,18 +70,18 @@ public class ANNTest {
 	public static double[][] Reading2DArrayFromFileTarget()
 	{
 		Scanner scannerTarget;
-		int rows = 888;
-		int columns = 9;
+		int rows = 89; // Number of rows to be scanned
+		int columns = 9; // Number of columns to be scanned
 		double [][] arrayTarget = new double[rows][columns];
 		
 		try 
 		{
-			scannerTarget = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/DatasetTarget.txt")));
+			scannerTarget = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/train/DatasetTarget-1000.txt")));
 			while(scannerTarget.hasNextLine()) {
 			    for (int i=0; i<arrayTarget.length; i++) {
-			       String[] line = scannerTarget.nextLine().trim().split(" ");
+			       String[] line = scannerTarget.nextLine().trim().split(" "); // Splitting the dataset
 			          for (int j=0; j<line.length; j++) {
-			        	  arrayTarget[i][j] = Integer.parseInt(line[j]);
+			        	  arrayTarget[i][j] = Integer.parseInt(line[j]); // Parsing String to Integer and save to array
 			          }
 			    }
 			}
@@ -99,18 +98,19 @@ public class ANNTest {
 	 */
 	public static void main(final String args[]) {
 		
+		// Saving the data scanned into the double arrays
 		LENGTH_RAW_DATA = Reading2DArrayFromFileLength();
 		TARGET_RAW_DATA = Reading2DArrayFromFileTarget();
 		
-		// create a neural network, without using a factory
+		// Create a neural network
 		BasicNetwork network = new BasicNetwork();
-		network.addLayer(new BasicLayer(null,true,9));
-		network.addLayer(new BasicLayer(new ActivationReLU(),true,18));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(),false,9));
+		network.addLayer(new BasicLayer(null,true,9)); // 9 input nodes
+		network.addLayer(new BasicLayer(new ActivationReLU(),true,18)); // 18 hidden nodes
+		network.addLayer(new BasicLayer(new ActivationSigmoid(),false,9)); // 9 output nodes
 		network.getStructure().finalizeStructure();
 		network.reset();
 		
-		// creating a normalization rules
+		// Creating a normalization rules
 		NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 50000, 10000, 1, 0);
 		NormalizedField output = new NormalizedField(NormalizationAction.Normalize, null, 10, 0, 1, 0);
 		
@@ -128,10 +128,10 @@ public class ANNTest {
 			}
 		}
 		
-		// create training data
-		MLDataSet trainingSet = new BasicMLDataSet( LENGTH_RAW_DATA, TARGET_RAW_DATA);
+		// Create training data
+		MLDataSet trainingSet = new BasicMLDataSet(LENGTH_RAW_DATA, TARGET_RAW_DATA);
 		
-		// train the neural network
+		// Train the neural network
 		final ManhattanPropagation train = new ManhattanPropagation(network, trainingSet, 0.00001);
 		int epoch = 1;
 		
@@ -139,10 +139,10 @@ public class ANNTest {
 			train.iteration();
 			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
-		} while(epoch<100000);
+		} while(epoch<100000 && train.getError()>0.12); // Epoch until 100000 or error below 14% (Best Fit for ANN)
 		train.finishTraining();
 		
-		// test the neural network
+		// Test the neural network
 		System.out.println("Neural Network Results:");
 		for(MLDataPair pair: trainingSet ) {
 			final MLData outputData = network.compute(pair.getInput());
@@ -165,7 +165,7 @@ public class ANNTest {
 			System.out.println("");
 		}
 		
-		// saving the neural network
+		// Saving the neural network
 		EncogDirectoryPersistence.saveObject(new File("ANNscheduler.EG"), network);
 		Encog.getInstance().shutdown();
 	}
