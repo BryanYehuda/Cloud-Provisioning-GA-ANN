@@ -65,13 +65,13 @@ public class CloudSimulationANN {
 	public static double[][] Reading2DArrayFromFileLength()
 	{
 		Scanner scannerLength;
-		int rows = 111; // Number of rows to be scanned
+		int rows = 163; // Number of rows to be scanned
 		int columns = 9; // Number of columns to be scanned
 		double [][] arrayLength = new double[rows][columns];
 			
 		try 
 		{
-			scannerLength = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/test/TestLength-5000.txt")));
+			scannerLength = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/test/TestLength-SDSC.txt")));
 			while(scannerLength.hasNextLine()) {
 				for (int i=0; i<arrayLength.length; i++) {
 				    String[] line = scannerLength.nextLine().trim().split(" "); // Splitting the dataset
@@ -90,13 +90,13 @@ public class CloudSimulationANN {
 	public static double[][] Reading2DArrayFromFileTarget()
 	{
 		Scanner scannerTarget;
-		int rows = 111; // Number of rows to be scanned
+		int rows = 163; // Number of rows to be scanned
 		int columns = 9; // Number of columns to be scanned
 		double [][] arrayTarget = new double[rows][columns];
 			
 		try 
 		{
-			scannerTarget = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/test/TestTarget-5000.txt")));
+			scannerTarget = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/test/TestTarget-SDSC.txt")));
 			while(scannerTarget.hasNextLine()) {
 				for (int i=0; i<arrayTarget.length; i++) {
 				    String[] line = scannerTarget.nextLine().trim().split(" "); // Splitting the dataset
@@ -145,21 +145,21 @@ public class CloudSimulationANN {
 		return list;
 	}
 
-	private static ArrayList<Integer> getSeedValue(int cloudletcount){
+	private static ArrayList<Double> getSeedValue(int cloudletcount){
 		
 		// Creating an arraylist to store Cloudlet Datasets
-		ArrayList<Integer> seed = new ArrayList<Integer>();
-		Log.printLine(System.getProperty("user.dir")+ "/dataset/RandomDataset-5000.txt");
+		ArrayList<Double> seed = new ArrayList<Double>();
+		Log.printLine(System.getProperty("user.dir")+ "/dataset/SDSCDatasetANN.txt");
 		
 		try{
 			// Opening and scanning the file
-			File fobj = new File(System.getProperty("user.dir")+ "/dataset/RandomDataset-5000.txt");
+			File fobj = new File(System.getProperty("user.dir")+ "/dataset/SDSCDatasetANN.txt");
 			java.util.Scanner readFile = new java.util.Scanner(fobj);
 			
 			while(readFile.hasNextLine() && cloudletcount>0)
 			{
 				// Adding the file to the arraylist
-				seed.add(readFile.nextInt());
+				seed.add(readFile.nextDouble());
 				cloudletcount--;
 			}
 			readFile.close();
@@ -173,13 +173,14 @@ public class CloudSimulationANN {
 
 	private static List<Cloudlet> createCloudlet(int userId, int cloudlets){
 		
-		ArrayList<Integer> randomSeed = getSeedValue(cloudlets);
+		ArrayList<Double> randomSeed = getSeedValue(cloudlets);
 		
 		// Creates a container to store Cloudlets
 		LinkedList<Cloudlet> list = new LinkedList<Cloudlet>();
 
 		//Cloudlet parameters
-		long length = 1000; // Cloudlet length (MI)
+		long length = 0; // Cloudlet length (MI) - 0 for SDSC
+		//long length = 1000; // Cloudlet length (MI) - 1000 for Random Dataset
 		long fileSize = 300; // Cloudlet file size (MB)
 		long outputSize = 300; // Cloudlet file size (MB)
 		int pesNumber = 1; // Cloudlet CPU needed to process
@@ -188,7 +189,7 @@ public class CloudSimulationANN {
 		Cloudlet[] cloudlet = new Cloudlet[cloudlets];
 
 		for(int i=0;i<cloudlets;i++){
-			long finalLen = length + randomSeed.get(i);
+			long finalLen = length +  Double.valueOf(randomSeed.get(i)).longValue();
 			// Creating the cloudlet with all the parameter listed
 			cloudlet[i] = new Cloudlet(i, finalLen, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
 			
@@ -214,7 +215,7 @@ public class CloudSimulationANN {
 			boolean trace_flag = false;  // Mean trace events
 			int hostId=0; // Starting host ID
 			int vmNumber = 54; // The number of VMs created
-			int cloudletNumber = 1000; // The number of Tasks created
+			int cloudletNumber = 1479; // The number of Tasks created
 
 			// Initialize the CloudSim library
 			CloudSim.init(num_user, calendar, trace_flag);
@@ -251,12 +252,13 @@ public class CloudSimulationANN {
 			
 				
 			//Sixth step: Use ANN
-			BasicNetwork network = (BasicNetwork)EncogDirectoryPersistence.loadObject(new File("ANNscheduler-5000.EG"));
+			BasicNetwork network = (BasicNetwork)EncogDirectoryPersistence.loadObject(new File("ANNscheduler-SDSC.EG"));
 			LENGTH_RAW_DATA = Reading2DArrayFromFileLength();
 			TARGET_RAW_DATA = Reading2DArrayFromFileTarget();
 			
 			// Creating a normalization rules
-			NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 50000, 10000, 1, 0);
+			//NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 50000, 10000, 1, 0); //for Random Dataset
+			NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 8790000, 0, 1, 0); //for SDSC
 			NormalizedField output = new NormalizedField(NormalizationAction.Normalize, null, 10, 0, 1, 0);
 			
 			// Doing normalization to the Input

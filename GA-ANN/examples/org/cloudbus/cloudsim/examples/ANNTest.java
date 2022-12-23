@@ -45,13 +45,13 @@ public class ANNTest {
 	public static double[][] Reading2DArrayFromFileLength()
 	{
 		Scanner scannerLength;
-		int rows = 89; // Number of rows to be scanned
+		int rows = 653; // Number of rows to be scanned
 		int columns = 9; // Number of columns to be scanned
 		double [][] arrayLength = new double[rows][columns];
 		
 		try 
 		{
-			scannerLength = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/train/DatasetLength-1000.txt")));
+			scannerLength = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/train/DatasetLength-SDSC.txt")));
 			while(scannerLength.hasNextLine()) {
 			    for (int i=0; i<arrayLength.length; i++) {
 			       String[] line = scannerLength.nextLine().trim().split(" "); // Splitting the dataset
@@ -70,13 +70,13 @@ public class ANNTest {
 	public static double[][] Reading2DArrayFromFileTarget()
 	{
 		Scanner scannerTarget;
-		int rows = 89; // Number of rows to be scanned
+		int rows = 653; // Number of rows to be scanned
 		int columns = 9; // Number of columns to be scanned
 		double [][] arrayTarget = new double[rows][columns];
 		
 		try 
 		{
-			scannerTarget = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/train/DatasetTarget-1000.txt")));
+			scannerTarget = new Scanner(new BufferedReader(new FileReader(System.getProperty("user.dir")+ "/train/DatasetTarget-SDSC.txt")));
 			while(scannerTarget.hasNextLine()) {
 			    for (int i=0; i<arrayTarget.length; i++) {
 			       String[] line = scannerTarget.nextLine().trim().split(" "); // Splitting the dataset
@@ -111,7 +111,8 @@ public class ANNTest {
 		network.reset();
 		
 		// Creating a normalization rules
-		NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 50000, 10000, 1, 0);
+		//NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 50000, 10000, 1, 0); //for Random Dataset
+		NormalizedField input = new NormalizedField(NormalizationAction.Normalize, null, 8790000, 0, 1, 0); //for SDSC
 		NormalizedField output = new NormalizedField(NormalizationAction.Normalize, null, 10, 0, 1, 0);
 		
 		// Doing normalization to the Input
@@ -139,7 +140,7 @@ public class ANNTest {
 			train.iteration();
 			System.out.println("Epoch #" + epoch + " Error:" + train.getError());
 			epoch++;
-		} while(epoch<100000 && train.getError()>0.12); // Epoch until 100000 or error below 14% (Best Fit for ANN)
+		} while(epoch<100000 && train.getError()>0.15); // Epoch until 100000 or error below 12% (Best Fit for ANN)
 		train.finishTraining();
 		
 		// Test the neural network
